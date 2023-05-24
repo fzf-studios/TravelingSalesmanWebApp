@@ -1,0 +1,25 @@
+@page "/City"
+@using BlazorApp2.Data
+@inject ApplicationDBContext Context
+<h3>Города</h3>
+
+<MudTextField @bind-Value="CityName" Label="Введите название города" Variant="Variant.Filled"></MudTextField>
+<MudButton OnClick="AddCityDb">Добавить</MudButton>
+@foreach (var item in Context.Cities)
+{
+    <MudText>@item.Name</MudText>
+}
+
+@code {
+    public string CityName;
+
+    public void AddCityDb()
+    {
+       var city = new Data.Models.City() { Name = CityName };
+        Context.Cities.Add(city);
+        Context.SaveChangesAsync().AndForget();
+    }
+
+   
+
+}

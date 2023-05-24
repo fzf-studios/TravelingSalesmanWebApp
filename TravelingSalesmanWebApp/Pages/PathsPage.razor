@@ -1,0 +1,86 @@
+@page "/Paths"
+@using BlazorApp2.Data.Models
+@using BlazorApp2.Data
+@inject ApplicationDBContext Context
+
+<h3>Пути</h3>
+
+<MudSelect @bind-Value="@SelectedCity" T="City" Label="Начальный город">
+    @foreach (var item in Context.Cities)
+    {
+        <MudSelectItem Value="@item">@item.Name</MudSelectItem>
+    }
+</MudSelect>
+
+@if (SelectedCity != null)
+{
+    <MudSelect @bind-Value="@endCity" T="City" Label="Конечный город">
+        @foreach (var item in GetExceptSelected())
+        {
+            <MudSelectItem Value="@item">@item.Name</MudSelectItem>
+        }
+    </MudSelect>
+    <MudTextField @bind-Value="weight" Label="Введите вес" Variant="Variant.Filled"></MudTextField>
+    <MudIconButton OnClick="CreatePath" Variant="Variant.Filled" Color="Color.Secondary" Icon="@Icons.Material.Filled.Add"></MudIconButton>
+}
+
+<MudStack Row="false">
+    @foreach (var item in GetPathSelectedCity())
+    {
+        <MudStack Row="true">
+            @if (selectedCity.Id == item.StartCityId)
+            {
+                <MudPaper Class="pa-3">@GetCityById(item.EndCityId).Name</MudPaper>
+            }
+            else
+            {
+                <MudPaper Class="pa-3">@GetCityById(item.StartCityId).Name</MudPaper>
+            }
+                <MudPaper Class="pa-3">@item.Weight</MudPaper>
+        </MudStack>
+    }
+</MudStack>
+
+@code {
+
+    public City? SelectedCity
+    {
+        get => selectedCity;
+        set
+        {
+            endCity = null;
+            selectedCity = value;
+        }
+    }
+
+    public City? selectedCity;
+    public City? endCity { get; set; }
+    public int weight;
+
+
+    public IEnumerable<City> GetExceptSelected()
+    {
+        return Context.Cities
+            .Where(city => city != selectedCity);
+    }
+
+    public void CreatePath()
+    {
+        Path path = new Path();
+        path.StartCityId = selectedCity.Id;
+        path.EndCityId = endCity.Id;
+        path.Weight = weight;
+        Context.Paths.Add(path);
+        Context.SaveChangesAsync().AndForget();
+    }
+
+    public City GetCityById(Guid id) => Context.Cities.First(city => city.Id == id);
+
+    public IEnumerable<Path> GetPathSelectedCity()
+    {
+        if (selectedCity == null) return Array.Empty<Path>();
+        return Context.Paths
+            .Where(path => path.StartCityId == selectedCity.Id || path.EndCityId == selectedCity.Id);
+    }
+
+}

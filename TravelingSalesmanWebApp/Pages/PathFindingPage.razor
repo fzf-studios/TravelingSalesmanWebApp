@@ -1,0 +1,41 @@
+@page "/PathFindingPage"
+@using Microsoft.AspNetCore.Components
+@using BlazorApp2.Data.Models
+@using BlazorApp2.Data
+@using BlazorApp2.Domain
+@inject ApplicationDBContext Context
+@inject IPathApplication PathApplication
+
+<h3>Поиск оптимального пути</h3>
+
+<MudSelect @bind-Value="@startId" T="City" Label="Стартовый город">
+    @foreach (var item in Context.Cities)
+    {
+        <MudSelectItem Value="@item">@item.Name</MudSelectItem>
+    }
+</MudSelect>
+<MudSelect @bind-Value="@endId" T="City" Label="Конечный город">
+    @foreach (var item in Context.Cities)
+    {
+        <MudSelectItem Value="@item">@item.Name</MudSelectItem>
+    }
+</MudSelect>
+
+    <MudIconButton OnClick="GetResult" Variant="Variant.Filled" Color="Color.Secondary" Icon="@Icons.Material.Filled.Calculate"></MudIconButton>
+    <MudText>@result</MudText>
+
+@code {
+    public City startId;
+    public City endId;
+    public string result;
+
+    public void GetResult()
+    {
+        var resultDictionary = PathApplication.GetShortestPath(startId.Id, endId.Id);
+        var sumPath = resultDictionary.Select(pair => pair.Value)
+            .Where(value => value != int.MaxValue && value > 0)
+            .Sum();
+        var resultNames = resultDictionary.Select(pair => pair.Key.Name);
+        result = String.Join("->", resultNames) + " " + sumPath;
+    }
+}

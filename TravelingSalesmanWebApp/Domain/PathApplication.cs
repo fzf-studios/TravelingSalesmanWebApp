@@ -19,7 +19,7 @@ public class PathApplication:IPathApplication
     public PathApplication(ApplicationDBContext context)
     {
         _context = context;
-        _pathAlgorithm = new DijkstraAlgorithm(); //BellmanFordAlgorithm();
+        _pathAlgorithm = new GreedyAlgorithm(); //BellmanFordAlgorithm();
     }
     public Dictionary<City, int> GetShortestPath(Guid startId, Guid endId)
     {

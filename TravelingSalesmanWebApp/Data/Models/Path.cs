@@ -1,4 +1,4 @@
-namespace BlazorApp2.Data.Models;
+namespace TravelingSalesmanWebApp.Data.Models;
 
 public class Path:BaseModel
 {

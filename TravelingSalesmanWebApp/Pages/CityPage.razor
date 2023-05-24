@@ -1,5 +1,4 @@
 @page "/City"
-@using BlazorApp2.Data
 @inject ApplicationDBContext Context
 <h3>Города</h3>
 
@@ -15,11 +14,8 @@
 
     public void AddCityDb()
     {
-       var city = new Data.Models.City() { Name = CityName };
+        var city = new Data.Models.City() { Name = CityName };
         Context.Cities.Add(city);
         Context.SaveChangesAsync().AndForget();
     }
-
-   
-
 }

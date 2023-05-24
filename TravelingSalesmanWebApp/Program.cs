@@ -1,9 +1,8 @@
-using BlazorApp2.Data;
-using BlazorApp2.Domain;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
+using TravelingSalesmanWebApp.Data;
+using TravelingSalesmanWebApp.Data.Services;
+using TravelingSalesmanWebApp.Domain;
 
 var builder = WebApplication.CreateBuilder(args);
 

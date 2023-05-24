@@ -1,9 +1,8 @@
-using System.Data.SqlTypes;
-using BlazorApp2.Data;
-using BlazorApp2.Data.Models;
-using BlazorApp2.Domain.PathAlgorithm;
+using TravelingSalesmanWebApp.Data;
+using TravelingSalesmanWebApp.Data.Models;
+using TravelingSalesmanWebApp.Domain.PathAlgorithm;
 
-namespace BlazorApp2.Domain;
+namespace TravelingSalesmanWebApp.Domain;
 
 public interface IPathApplication
 {
@@ -25,7 +24,7 @@ public class PathApplication:IPathApplication
     {
         var startCity = GetCityById(startId);
         var endCity = GetCityById(endId);
-        var shortestPath = _pathAlgorithm.FindShortestPath(startCity, endCity, _context.Paths.ToList());
+        var shortestPath = _pathAlgorithm.FindShortestPath(startCity.Id, endCity.Id, _context.Paths.ToList());
         return shortestPath
             .ToDictionary(pair => GetCityById(pair.Key), pair => pair.Value);
     }

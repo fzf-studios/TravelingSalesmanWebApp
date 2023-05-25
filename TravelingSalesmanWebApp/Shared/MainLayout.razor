@@ -1,6 +1,7 @@
 @using TravelingSalesmanWebApp.Data.Services
 @inherits LayoutComponentBase
 @inject IUserSettingsRepository UserSettingsRepository
+@implements IDisposable
 <MudDialogProvider/>
 <MudSnackbarProvider/>
 <PageTitle>Задача коммивояжёра</PageTitle>
@@ -36,5 +37,10 @@
     {
         base.OnInitialized();
         UserSettingsRepository.OnStateChanged += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        UserSettingsRepository.OnStateChanged -= StateHasChanged;
     }
 }

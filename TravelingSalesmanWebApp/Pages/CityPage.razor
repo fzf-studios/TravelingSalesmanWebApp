@@ -5,6 +5,7 @@
 @inject ApplicationDBContext Context
 @inject IClipboardService ClipboardService
 @inject IUserSettingsRepository UserSettingsRepository
+@implements IDisposable
 
 <MudText Typo="Typo.h1" Align="Align.Center">Города</MudText>
 
@@ -88,4 +89,9 @@
     }
 
     private string GetRefToPaths(City city) => $"/Paths/{city.Id}";
+
+    public void Dispose()
+    {
+        UserSettingsRepository.OnStateChanged -= StateHasChanged;
+    }
 }

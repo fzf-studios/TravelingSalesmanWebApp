@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace BlazorApp2.Migrations
+namespace TravelingSalesmanWebApp.Migrations
 {
     /// <inheritdoc />
     public partial class addsCityNameFild : Migration

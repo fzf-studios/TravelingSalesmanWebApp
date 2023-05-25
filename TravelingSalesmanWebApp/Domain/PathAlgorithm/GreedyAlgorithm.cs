@@ -1,12 +1,34 @@
-using BlazorApp2.Data.Models;
-using Path = BlazorApp2.Data.Models.Path;
+using Path = TravelingSalesmanWebApp.Data.Models.Path;
 
-namespace BlazorApp2.Domain.PathAlgorithm;
+namespace TravelingSalesmanWebApp.Domain.PathAlgorithm;
 
-public class GreedyAlgorithm:IPathAlgorithm
+public class GreedyAlgorithm : IPathAlgorithm
 {
-    public Dictionary<Guid, int> FindShortestPath(City startCity, City endCity, List<Path> edges)
+    public Dictionary<Guid, int> FindShortestPath(Guid startCityId, Guid endCityId, List<Path> edges)
     {
-        throw new NotImplementedException();
+        var distances = new Dictionary<Guid, int>();
+        var previous = new Dictionary<Guid, Guid>();
+
+        foreach (var edge in edges)
+        {
+            distances.TryAdd(edge.StartCityId, int.MaxValue);
+            distances.TryAdd(edge.EndCityId, int.MaxValue);
+        }
+
+        distances[startCityId] = 0;
+
+        foreach (var edge in edges)
+        {
+            var newDistance = distances[edge.StartCityId] + edge.Weight;
+
+            if (newDistance < distances[edge.EndCityId])
+            {
+                distances[edge.EndCityId] = newDistance;
+                previous[edge.EndCityId] = edge.StartCityId;
+            }
+        }
+
+        return distances.ToDictionary(x => x.Key, x => x.Value);
     }
+
 }

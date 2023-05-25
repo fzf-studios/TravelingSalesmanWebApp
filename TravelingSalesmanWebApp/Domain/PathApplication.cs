@@ -1,9 +1,8 @@
-using System.Data.SqlTypes;
-using BlazorApp2.Data;
-using BlazorApp2.Data.Models;
-using BlazorApp2.Domain.PathAlgorithm;
+using TravelingSalesmanWebApp.Data;
+using TravelingSalesmanWebApp.Data.Models;
+using TravelingSalesmanWebApp.Domain.PathAlgorithm;
 
-namespace BlazorApp2.Domain;
+namespace TravelingSalesmanWebApp.Domain;
 
 public interface IPathApplication
 {
@@ -19,13 +18,13 @@ public class PathApplication:IPathApplication
     public PathApplication(ApplicationDBContext context)
     {
         _context = context;
-        _pathAlgorithm = new DijkstraAlgorithm(); //BellmanFordAlgorithm();
+        _pathAlgorithm = new GreedyAlgorithm(); //BellmanFordAlgorithm();
     }
     public Dictionary<City, int> GetShortestPath(Guid startId, Guid endId)
     {
         var startCity = GetCityById(startId);
         var endCity = GetCityById(endId);
-        var shortestPath = _pathAlgorithm.FindShortestPath(startCity, endCity, _context.Paths.ToList());
+        var shortestPath = _pathAlgorithm.FindShortestPath(startCity.Id, endCity.Id, _context.Paths.ToList());
         return shortestPath
             .ToDictionary(pair => GetCityById(pair.Key), pair => pair.Value);
     }

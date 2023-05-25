@@ -1,9 +1,8 @@
-using BlazorApp2.Data;
-using BlazorApp2.Domain;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
+using TravelingSalesmanWebApp.Data;
+using TravelingSalesmanWebApp.Data.Services;
+using TravelingSalesmanWebApp.Domain;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +14,8 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddMudServices();
 builder.Services.AddScoped<IPathApplication, PathApplication>();
+builder.Services.AddScoped<IUserSettingsRepository, UserSettingsRepository>();
+builder.Services.AddSession();
 
 var app = builder.Build();
 
@@ -31,6 +32,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+app.UseSession();
 
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");

@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace BlazorApp2.Migrations
+namespace TravelingSalesmanWebApp.Migrations
 {
     /// <inheritdoc />
     public partial class addsCity : Migration

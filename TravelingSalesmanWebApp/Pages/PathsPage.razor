@@ -1,5 +1,7 @@
 @page "/Paths"
+@page "/Paths/{SelectedCityIdString}"
 @using TravelingSalesmanWebApp.Data.Models
+@using Path = Data.Models.Path
 @inject ApplicationDBContext Context
 
 <h3>Пути</h3>
@@ -35,12 +37,15 @@
             {
                 <MudPaper Class="pa-3">@GetCityById(item.StartCityId).Name</MudPaper>
             }
-                <MudPaper Class="pa-3">@item.Weight</MudPaper>
+            <MudPaper Class="pa-3">@item.Weight</MudPaper>
         </MudStack>
     }
 </MudStack>
 
 @code {
+    
+    [Parameter]
+    public string SelectedCityIdString { get; set; }
 
     public City? SelectedCity
     {
@@ -82,4 +87,13 @@
             .Where(path => path.StartCityId == selectedCity.Id || path.EndCityId == selectedCity.Id);
     }
 
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        if (string.IsNullOrEmpty(SelectedCityIdString)) 
+            return;
+        
+        var selectedCityId = Guid.Parse(SelectedCityIdString);
+        SelectedCity = Context.Cities.First(city => city.Id == selectedCityId);
+    }
 }

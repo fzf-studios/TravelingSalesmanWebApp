@@ -1,3 +1,4 @@
+using BlazorApp2.Domain.Helpers;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
 using TravelingSalesmanWebApp.Data;
@@ -15,6 +16,7 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddMudServices();
 builder.Services.AddScoped<IPathApplication, PathApplication>();
 builder.Services.AddScoped<IUserSettingsRepository, UserSettingsRepository>();
+builder.Services.AddScoped<IClipboardService, ClipboardService>();
 builder.Services.AddSession();
 
 var app = builder.Build();

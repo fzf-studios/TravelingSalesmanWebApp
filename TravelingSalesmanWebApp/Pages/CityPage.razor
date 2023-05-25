@@ -1,25 +1,88 @@
 @page "/City"
 @using BlazorApp2.Data
+@using BlazorApp2.Data.Models
+@using BlazorApp2.Domain.Helpers
 @inject ApplicationDBContext Context
-<h3>Города</h3>
+@inject IClipboardService ClipboardService
+<MudText Typo="Typo.h1" Align="Align.Center">Города</MudText>
 
-<MudTextField @bind-Value="CityName" Label="Введите название города" Variant="Variant.Filled"></MudTextField>
-<MudButton OnClick="AddCityDb">Добавить</MudButton>
-@foreach (var item in Context.Cities)
-{
-    <MudText>@item.Name</MudText>
-}
+<MudStack Row="true" Class="d-flex align-center">
+    <MudTextField @bind-Value="CityName" Label="Введите название города" Variant="Variant.Filled"/>
+    <MudIconButton Icon="@Icons.Material.Filled.Add" OnClick="Add"></MudIconButton>
+</MudStack>
+<MudStack Row="true" Class="d-flex align-center" Justify="Justify.Center">
+    <MudIconButton Icon="@Icons.Material.Filled.Password" OnClick="ChangeIdVisibility"/>
+    <MudToggleIconButton Icon="@Icons.Material.Filled.SyncDisabled" ToggledIcon="@Icons.Material.Filled.Sync" @bind-Toggled="@isAutoSave"/>
+    @if (!isAutoSave)
+    {
+        <MudIconButton Icon="@Icons.Material.Filled.Save" OnClick="ForceSave"/>
+    }
+</MudStack>
+<MudStack>
+    @foreach (var item in Cities)
+    {
+        <MudStack Row="true" Class="d-flex align-center">
+            @if (!_isIdHidden)
+            {
+                <MudTextField T="Guid" Variant="Variant.Outlined" Label="ID"
+                              ReadOnly="true" @bind-Value="@item.Id"
+                              Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.ContentCopy"
+                              OnAdornmentClick="() => CopyToClipboardAsync(item.Id.ToString()).AndForget()"/>
+            }
+            <MudTextField T="string" Variant="Variant.Filled" Label="Название" @bind-Value="@item.Name" OnBlur="SaveChanges"/>
+            <MudIconButton Icon="@Icons.Material.Filled.RemoveCircle" OnClick="() => Remove(item)" Size="Size.Medium"/>
+        </MudStack>
+    }
+    <MudDivider/>
+</MudStack>
 
 @code {
     public string CityName;
+    private bool _isIdHidden = true;
+    private bool isAutoSave = false;
+    private List<City> Cities;
 
-    public void AddCityDb()
+    public void Add()
     {
-       var city = new Data.Models.City() { Name = CityName };
+        var city = new City { Name = CityName };
+        Cities.Add(city);
         Context.Cities.Add(city);
+        SaveChanges();
+        CityName = string.Empty;
+    }
+
+    public void Remove(City city)
+    {
+        Context.Cities.Remove(city);
+        Cities.Remove(city);
+        SaveChanges();
+    }
+
+    public void SaveChanges()
+    {
+        if (isAutoSave)
+            Context.SaveChangesAsync().AndForget();
+    }
+
+    private void ChangeIdVisibility()
+    {
+        _isIdHidden = !_isIdHidden;
+    }
+
+    private void ForceSave()
+    {
         Context.SaveChangesAsync().AndForget();
     }
 
-   
+    private async Task CopyToClipboardAsync(string value)
+    {
+        await ClipboardService.WriteTextAsync(value);
+    }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        Cities = Context.Cities.ToList();
+    }
 
 }

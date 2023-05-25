@@ -17,6 +17,7 @@ builder.Services.AddMudServices();
 builder.Services.AddScoped<IPathApplication, PathApplication>();
 builder.Services.AddScoped<IUserSettingsRepository, UserSettingsRepository>();
 builder.Services.AddScoped<IClipboardService, ClipboardService>();
+builder.Services.AddScoped<IValidationService, ValidationService>();
 builder.Services.AddSession();
 
 var app = builder.Build();

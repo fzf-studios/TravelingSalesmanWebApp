@@ -5,11 +5,12 @@
 @inject ApplicationDBContext Context
 @inject IClipboardService ClipboardService
 @inject IUserSettingsRepository UserSettingsRepository
+@inject IValidationService ValidationService
 
 <MudText Typo="Typo.h1" Align="Align.Center">Города</MudText>
 
 <MudStack Row="true" Class="d-flex align-center">
-    <MudTextField @bind-Value="@UserSettingsRepository.LastEnteredCityName" Label="Введите название города" Variant="Variant.Filled"/>
+    <MudTextField @ref="@cityNameTextField" @bind-Value="@UserSettingsRepository.LastEnteredCityName" Label="Введите название города" OnKeyUp="ClearError" Variant="Variant.Filled"/>
     <MudIconButton Icon="@Icons.Material.Filled.Add" OnClick="Add"></MudIconButton>
 </MudStack>
 <MudStack Row="true" Class="d-flex align-center" Justify="Justify.Center">
@@ -41,9 +42,17 @@
 
 @code {
     private List<City> Cities;
+    private MudTextField<string> cityNameTextField;
 
     public void Add()
     {
+        var valid = ValidationService.IsValidCityName(UserSettingsRepository.LastEnteredCityName, out var errorReason);
+        if (!valid)
+        {
+            cityNameTextField.ErrorText = errorReason;
+            cityNameTextField.Error = true;
+            return;
+        }
         var city = new City { Name = UserSettingsRepository.LastEnteredCityName };
         Cities.Add(city);
         Context.Cities.Add(city);
@@ -97,5 +106,10 @@
     }
 
     private string GetRefToPaths(City city) => $"/Paths/{city.Id}";
+
+    private void ClearError()
+    {
+        cityNameTextField.Error = false;
+    }
 
 }

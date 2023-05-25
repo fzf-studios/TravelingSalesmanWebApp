@@ -1,5 +1,6 @@
 using BlazorApp2.Data;
 using BlazorApp2.Domain;
+using BlazorApp2.Domain.Helpers;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +16,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddMudServices();
 builder.Services.AddScoped<IPathApplication, PathApplication>();
+builder.Services.AddScoped<IClipboardService, ClipboardService>();
 
 var app = builder.Build();
 

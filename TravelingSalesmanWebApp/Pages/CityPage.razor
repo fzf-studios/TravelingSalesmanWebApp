@@ -1,10 +1,11 @@
 @page "/City"
 @using BlazorApp2.Domain.Helpers
 @using TravelingSalesmanWebApp.Data.Models
-@using TravelingSalesmanWebApp.Data.Services
+@using TravelingSalesmanWebApp.Domain.Services
 @inject ApplicationDBContext Context
 @inject IClipboardService ClipboardService
 @inject IUserSettingsRepository UserSettingsRepository
+@inject NavigationManager NavigationManager
 
 <MudText Typo="Typo.h1" Align="Align.Center">Города</MudText>
 
@@ -19,6 +20,7 @@
     {
         <MudIconButton Icon="@Icons.Material.Filled.Save" OnClick="ForceSave"/>
     }
+    <MudIconButton Disabled="UserSettingsRepository.CityIdHidden" Icon="@Icons.Material.Filled.DeleteForever" OnClick="ClearAll"/>
 </MudStack>
 <MudStack>
     @foreach (var item in Cities)
@@ -31,7 +33,7 @@
                               Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.ContentCopy"
                               OnAdornmentClick="() => CopyToClipboardAsync(item.Id.ToString()).AndForget()"/>
             }
-            <MudTextField T="string" Variant="Variant.Filled" Label="Название" @bind-Value="@item.Name" OnBlur="SaveChanges"/>
+            <MudTextField T="string" Variant="Variant.Filled" Label="Название" @bind-Value="@item.Name" OnBlur="SaveChangesIfAutoSave"/>
             <MudIconButton Icon="@Icons.Material.Filled.EditRoad" Href="@GetRefToPaths(item)"/>
             <MudIconButton Icon="@Icons.Material.Filled.RemoveCircle" OnClick="() => Remove(item)" Size="Size.Medium"/>
         </MudStack>
@@ -47,7 +49,7 @@
         var city = new City { Name = UserSettingsRepository.LastEnteredCityName };
         Cities.Add(city);
         Context.Cities.Add(city);
-        SaveChanges();
+        SaveChangesIfAutoSave();
         UserSettingsRepository.LastEnteredCityName = string.Empty;
     }
 
@@ -55,21 +57,28 @@
     {
         Context.Cities.Remove(city);
         Cities.Remove(city);
-        SaveChanges();
+        SaveChangesIfAutoSave();
     }
 
-    public void SaveChanges()
+    public void SaveChangesIfAutoSave()
     {
         if (UserSettingsRepository.AutoSaveEnabled)
             Context.SaveChangesAsync().AndForget();
     }
-
+    
     private void ChangeIdVisibility()
     {
         UserSettingsRepository.CityIdHidden = !UserSettingsRepository.CityIdHidden;
         StateHasChanged();
     }
 
+    public void ClearAll()
+    {
+        Context.Cities.RemoveRange(Context.Cities);
+        Cities.RemoveRange(0,Cities.Count);
+        SaveChangesIfAutoSave();
+    }
+    
     private void ForceSave()
     {
         Context.SaveChangesAsync().AndForget();

@@ -2,8 +2,8 @@ using BlazorApp2.Domain.Helpers;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
 using TravelingSalesmanWebApp.Data;
-using TravelingSalesmanWebApp.Data.Services;
 using TravelingSalesmanWebApp.Domain;
+using TravelingSalesmanWebApp.Domain.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

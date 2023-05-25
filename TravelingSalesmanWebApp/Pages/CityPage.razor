@@ -1,18 +1,21 @@
 @page "/City"
 @using BlazorApp2.Domain.Helpers
 @using TravelingSalesmanWebApp.Data.Models
+@using TravelingSalesmanWebApp.Data.Services
 @inject ApplicationDBContext Context
 @inject IClipboardService ClipboardService
+@inject IUserSettingsRepository UserSettingsRepository
+
 <MudText Typo="Typo.h1" Align="Align.Center">Города</MudText>
 
 <MudStack Row="true" Class="d-flex align-center">
-    <MudTextField @bind-Value="CityName" Label="Введите название города" Variant="Variant.Filled"/>
+    <MudTextField @bind-Value="@UserSettingsRepository.LastEnteredCityName" Label="Введите название города" Variant="Variant.Filled"/>
     <MudIconButton Icon="@Icons.Material.Filled.Add" OnClick="Add"></MudIconButton>
 </MudStack>
 <MudStack Row="true" Class="d-flex align-center" Justify="Justify.Center">
     <MudIconButton Icon="@Icons.Material.Filled.Password" OnClick="ChangeIdVisibility"/>
-    <MudToggleIconButton Icon="@Icons.Material.Filled.SyncDisabled" ToggledIcon="@Icons.Material.Filled.Sync" @bind-Toggled="@isAutoSave"/>
-    @if (!isAutoSave)
+    <MudToggleIconButton Icon="@Icons.Material.Filled.SyncDisabled" ToggledIcon="@Icons.Material.Filled.Sync" @bind-Toggled="@UserSettingsRepository.AutoSaveEnabled"/>
+    @if (!UserSettingsRepository.AutoSaveEnabled)
     {
         <MudIconButton Icon="@Icons.Material.Filled.Save" OnClick="ForceSave"/>
     }
@@ -21,7 +24,7 @@
     @foreach (var item in Cities)
     {
         <MudStack Row="true" Class="d-flex align-center">
-            @if (!_isIdHidden)
+            @if (!UserSettingsRepository.CityIdHidden)
             {
                 <MudTextField T="Guid" Variant="Variant.Outlined" Label="ID"
                               ReadOnly="true" @bind-Value="@item.Id"
@@ -37,18 +40,15 @@
 </MudStack>
 
 @code {
-    public string CityName;
-    private bool _isIdHidden = true;
-    private bool isAutoSave = false;
     private List<City> Cities;
 
     public void Add()
     {
-        var city = new City { Name = CityName };
+        var city = new City { Name = UserSettingsRepository.LastEnteredCityName };
         Cities.Add(city);
         Context.Cities.Add(city);
         SaveChanges();
-        CityName = string.Empty;
+        UserSettingsRepository.LastEnteredCityName = string.Empty;
     }
 
     public void Remove(City city)
@@ -60,13 +60,14 @@
 
     public void SaveChanges()
     {
-        if (isAutoSave)
+        if (UserSettingsRepository.AutoSaveEnabled)
             Context.SaveChangesAsync().AndForget();
     }
 
     private void ChangeIdVisibility()
     {
-        _isIdHidden = !_isIdHidden;
+        UserSettingsRepository.CityIdHidden = !UserSettingsRepository.CityIdHidden;
+        StateHasChanged();
     }
 
     private void ForceSave()
@@ -83,6 +84,16 @@
     {
         base.OnInitialized();
         Cities = Context.Cities.ToList();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await UserSettingsRepository.LoadLastStateAsync();
+            StateHasChanged();
+        }
+        await base.OnAfterRenderAsync(firstRender);
     }
 
     private string GetRefToPaths(City city) => $"/Paths/{city.Id}";

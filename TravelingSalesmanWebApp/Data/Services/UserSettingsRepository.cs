@@ -8,6 +8,9 @@ public interface IUserSettingsRepository
 {
     public bool DarkMode { get; set; }
     bool DrawerOpened { get; set; }
+    bool AutoSaveEnabled { get; set; }
+    bool CityIdHidden { get; set; }
+    string LastEnteredCityName { get; set; }
     public Task LoadLastStateAsync();
 }
 
@@ -39,6 +42,36 @@ public class UserSettingsRepository : IUserSettingsRepository
         set
         {
             _settings.IsDrawerOpened = value;
+            SaveLastStateAsync().AndForget();
+        }
+    }
+    
+    public bool AutoSaveEnabled
+    {
+        get => _settings.IsAutoSaveEnabled;
+        set
+        {
+            _settings.IsAutoSaveEnabled = value;
+            SaveLastStateAsync().AndForget();
+        }
+    }
+    
+    public bool CityIdHidden
+    {
+        get => _settings.IsCityIdHidden;
+        set
+        {
+            _settings.IsCityIdHidden = value;
+            SaveLastStateAsync().AndForget();
+        }
+    }
+    
+    public string LastEnteredCityName
+    {
+        get => _settings.LastEnteredCityName;
+        set
+        {
+            _settings.LastEnteredCityName = value;
             SaveLastStateAsync().AndForget();
         }
     }

@@ -30,6 +30,7 @@
                               OnAdornmentClick="() => CopyToClipboardAsync(item.Id.ToString()).AndForget()"/>
             }
             <MudTextField T="string" Variant="Variant.Filled" Label="Название" @bind-Value="@item.Name" OnBlur="SaveChanges"/>
+            <MudIconButton Icon="@Icons.Material.Filled.EditRoad" Href="@GetRefToPaths(item)"/>
             <MudIconButton Icon="@Icons.Material.Filled.RemoveCircle" OnClick="() => Remove(item)" Size="Size.Medium"/>
         </MudStack>
     }
@@ -84,5 +85,7 @@
         base.OnInitialized();
         Cities = Context.Cities.ToList();
     }
+
+    private string GetRefToPaths(City city) => $"/Paths/{city.Id}";
 
 }

@@ -4,8 +4,9 @@ using TravelingSalesmanWebApp.Data.Models;
 
 namespace TravelingSalesmanWebApp.Data.Services;
 
-public interface IUserSettingsRepository
+public interface IUserSettingsRepository: IDisposable
 {
+    public event Action OnStateChanged;
     public bool DarkMode { get; set; }
     bool DrawerOpened { get; set; }
     bool AutoSaveEnabled { get; set; }
@@ -16,6 +17,8 @@ public interface IUserSettingsRepository
 
 public class UserSettingsRepository : IUserSettingsRepository
 {
+    public event Action? OnStateChanged;
+    
     private readonly ProtectedLocalStorage _protectedLocalStorage;
     private static readonly string UserSettingsKey = "UserSettings";
     private UserSettings _settings;
@@ -83,10 +86,17 @@ public class UserSettingsRepository : IUserSettingsRepository
         _settings = result.Success
             ? result.Value?? new ()
             : new();
+        OnStateChanged?.Invoke();
     }
 
     private async Task SaveLastStateAsync()
     {
         await _protectedLocalStorage.SetAsync(UserSettingsKey, _settings);
+        OnStateChanged?.Invoke();
+    }
+
+    public void Dispose()
+    {
+        OnStateChanged = null;
     }
 }

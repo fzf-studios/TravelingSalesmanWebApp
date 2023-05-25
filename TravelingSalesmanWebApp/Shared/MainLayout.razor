@@ -4,16 +4,16 @@
 <MudDialogProvider/>
 <MudSnackbarProvider/>
 <PageTitle>Задача коммивояжёра</PageTitle>
-<MudThemeProvider @bind-IsDarkMode="@IsDarkMode" Theme="MudColorSettings.UserTheme"/>
+<MudThemeProvider @bind-IsDarkMode="@UserSettingsRepository.DarkMode" Theme="MudColorSettings.UserTheme"/>
 <MudColorSettings/>
 
 <MudLayout>
     <MudContainer>
         <MudAppBar Color="Color.Dark">
             <MudIconButton Icon="@Icons.Material.Rounded.Menu" OnClick="OpenSideMenu"/>
-            <MudToggleIconButton ToggledIcon="@Icons.Material.Rounded.DarkMode" Icon="@Icons.Material.Rounded.LightMode" @bind-Toggled="@IsDarkMode"/>
+            <MudToggleIconButton ToggledIcon="@Icons.Material.Rounded.DarkMode" Icon="@Icons.Material.Rounded.LightMode" @bind-Toggled="@UserSettingsRepository.DarkMode"/>
         </MudAppBar>
-        <MudDrawer Open="IsDrawerOpened" Variant="@DrawerVariant.Mini" Anchor="Anchor.Start" Elevation="1">
+        <MudDrawer Open="UserSettingsRepository.DrawerOpened" Variant="@DrawerVariant.Mini" Anchor="Anchor.Start" Elevation="1">
             <MudNavMenu>
                 <MudNavLink Icon="@Icons.Material.Filled.LocationCity" Href="/City">Города</MudNavLink>
                 <MudNavLink Icon="@Icons.Material.Filled.EditRoad" Href="/Paths">Пути</MudNavLink>
@@ -30,20 +30,11 @@
 
 @code
 {
-    private bool IsDrawerOpened
-    {
-        get => UserSettingsRepository.DrawerOpened;
-        set => UserSettingsRepository.DrawerOpened = value;
-    }
+    private void OpenSideMenu() => UserSettingsRepository.DrawerOpened = !UserSettingsRepository.DrawerOpened;
 
-    private bool IsDarkMode
+    protected override void OnInitialized()
     {
-        get => UserSettingsRepository.DarkMode;
-        set => UserSettingsRepository.DarkMode = value;
-    }
-
-    private void OpenSideMenu()
-    {
-        IsDrawerOpened = !IsDrawerOpened;
+        base.OnInitialized();
+        UserSettingsRepository.OnStateChanged += StateHasChanged;
     }
 }

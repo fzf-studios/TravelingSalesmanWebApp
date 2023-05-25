@@ -84,18 +84,8 @@
     {
         base.OnInitialized();
         Cities = Context.Cities.ToList();
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            await UserSettingsRepository.LoadLastStateAsync();
-            StateHasChanged();
-        }
-        await base.OnAfterRenderAsync(firstRender);
+        UserSettingsRepository.OnStateChanged += StateHasChanged;
     }
 
     private string GetRefToPaths(City city) => $"/Paths/{city.Id}";
-
 }

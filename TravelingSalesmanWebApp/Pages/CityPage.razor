@@ -13,6 +13,7 @@
     <MudTextField @ref="@cityNameTextField" @bind-Value="@UserSettingsRepository.LastEnteredCityName" Label="Введите название города" OnKeyUp="ClearError" Variant="Variant.Filled"/>
     <MudIconButton Icon="@Icons.Material.Filled.Add" OnClick="Add"></MudIconButton>
 </MudStack>
+
 <MudStack Row="true" Class="d-flex align-center" Justify="Justify.Center">
     <MudIconButton Icon="@Icons.Material.Filled.Password" OnClick="ChangeIdVisibility"/>
     <MudToggleIconButton Icon="@Icons.Material.Filled.SyncDisabled" ToggledIcon="@Icons.Material.Filled.Sync" @bind-Toggled="@UserSettingsRepository.AutoSaveEnabled"/>
@@ -21,6 +22,7 @@
         <MudIconButton Icon="@Icons.Material.Filled.Save" OnClick="ForceSave"/>
     }
 </MudStack>
+
 <MudStack>
     @foreach (var item in Cities)
     {

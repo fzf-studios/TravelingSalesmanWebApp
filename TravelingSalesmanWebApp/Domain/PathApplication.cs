@@ -19,21 +19,21 @@ public class PathApplication:IPathApplication
     public PathApplication(ApplicationDBContext context)
     {
         _context = context;
-        _pathAlgorithm = new GreedyAlgorithm(); //BellmanFordAlgorithm();
+        _pathAlgorithm = new GreedyAlgorithm();
     }
     public ShortestPathModel GetShortestPath(Guid startId, Guid endId)
     {
-        var shortestPath = _pathAlgorithm.FindShortestPath(startId, endId, _context.Paths.ToList());
+        var allPaths = _context.Paths.ToList();
         
-        var cities = shortestPath.Select(GetCityById)
-            .ToArray();
+        var shortestPath = _pathAlgorithm.FindShortestPath(startId, endId, allPaths);
+        var cities = shortestPath.Select(GetCityById).ToArray();
         
         var paths = new List<Path>();
 
         for (int i = 0; i < cities.Length-1; i++)
         {
-            var pathBetween = GetPath(cities[i].Id, cities[i + 1].Id);
-            paths.Add(pathBetween);
+            var pathBetweenCities = GetPath(cities[i].Id, cities[i + 1].Id);
+            paths.Add(pathBetweenCities);
         }
         
         return new ShortestPathModel(cities, paths.ToArray());

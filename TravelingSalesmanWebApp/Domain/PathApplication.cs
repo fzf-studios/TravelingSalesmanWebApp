@@ -1,12 +1,13 @@
 using TravelingSalesmanWebApp.Data;
 using TravelingSalesmanWebApp.Data.Models;
 using TravelingSalesmanWebApp.Domain.PathAlgorithm;
+using Path = TravelingSalesmanWebApp.Data.Models.Path;
 
 namespace TravelingSalesmanWebApp.Domain;
 
 public interface IPathApplication
 {
-    Dictionary<City, int> GetShortestPath(Guid startId, Guid endId);
+    ShortestPathModel GetShortestPath(Guid startId, Guid endId);
 }
 
 public class PathApplication:IPathApplication
@@ -20,18 +21,33 @@ public class PathApplication:IPathApplication
         _context = context;
         _pathAlgorithm = new GreedyAlgorithm(); //BellmanFordAlgorithm();
     }
-    public Dictionary<City, int> GetShortestPath(Guid startId, Guid endId)
+    public ShortestPathModel GetShortestPath(Guid startId, Guid endId)
     {
-        var startCity = GetCityById(startId);
-        var endCity = GetCityById(endId);
-        var shortestPath = _pathAlgorithm.FindShortestPath(startCity.Id, endCity.Id, _context.Paths.ToList());
-        return shortestPath
-            .ToDictionary(pair => GetCityById(pair.Key), pair => pair.Value);
+        var shortestPath = _pathAlgorithm.FindShortestPath(startId, endId, _context.Paths.ToList());
+        
+        var cities = shortestPath.Select(GetCityById)
+            .ToArray();
+        
+        var paths = new List<Path>();
+
+        for (int i = 0; i < cities.Length-1; i++)
+        {
+            var pathBetween = GetPath(cities[i].Id, cities[i + 1].Id);
+            paths.Add(pathBetween);
+        }
+        
+        return new ShortestPathModel(cities, paths.ToArray());
     }
 
     private City GetCityById(Guid Id)
     {
         var endCity = _context.Cities.First(city => city.Id == Id);
         return endCity;
+    }
+    
+    private Path GetPath(Guid startId, Guid endId)
+    {
+        var paths = _context.Paths.ToArray();
+        return paths.First(path => path.CityIds.Contains(startId) && path.CityIds.Contains(endId));
     }
 }

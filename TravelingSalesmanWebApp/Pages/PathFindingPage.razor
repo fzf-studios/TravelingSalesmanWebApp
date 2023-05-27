@@ -30,11 +30,11 @@
 
     public void GetResult()
     {
-        var resultDictionary = PathApplication.GetShortestPath(startId.Id, endId.Id);
-        var sumPath = resultDictionary.Select(pair => pair.Value)
-            .Where(value => value != int.MaxValue && value > 0)
+        var shortestPathModel = PathApplication.GetShortestPath(startId.Id, endId.Id);
+        var distances = shortestPathModel.Paths.Select(x => x.Weight);
+        var sumPath = distances
             .Sum();
-        var resultNames = resultDictionary.Select(pair => pair.Key.Name);
+        var resultNames = shortestPathModel.Cities.Select(city => city.Name);
         result = String.Join("->", resultNames) + " " + sumPath;
     }
 }

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using MudBlazor;
 using TravelingSalesmanWebApp.Data.Models;
+using TravelingSalesmanWebApp.Domain.PathAlgorithm.Enum;
 
 namespace TravelingSalesmanWebApp.Domain.Services;
 
@@ -12,6 +13,7 @@ public interface IUserSettingsRepository: IDisposable
     bool AutoSaveEnabled { get; set; }
     bool CityIdHidden { get; set; }
     string LastEnteredCityName { get; set; }
+    AlgorithmType LastSelectedAlgorithm { get; set; }
     public Task LoadLastStateAsync();
 }
 
@@ -75,6 +77,16 @@ public class UserSettingsRepository : IUserSettingsRepository
         set
         {
             _settings.LastEnteredCityName = value;
+            SaveLastStateAsync().AndForget();
+        }
+    }
+    
+    public AlgorithmType LastSelectedAlgorithm
+    {
+        get => _settings.LastSelectedAlgorithm;
+        set
+        {
+            _settings.LastSelectedAlgorithm = value;
             SaveLastStateAsync().AndForget();
         }
     }

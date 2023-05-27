@@ -1,3 +1,5 @@
+using TravelingSalesmanWebApp.Domain.PathAlgorithm.Enum;
+
 namespace TravelingSalesmanWebApp.Data.Models;
 
 public class UserSettings
@@ -7,4 +9,5 @@ public class UserSettings
     public bool IsAutoSaveEnabled { get; set; }
     public bool IsCityIdHidden { get; set; } = true;
     public string LastEnteredCityName { get; set; } = string.Empty;
+    public AlgorithmType LastSelectedAlgorithm { get; set; } = AlgorithmType.Greedy;
 }

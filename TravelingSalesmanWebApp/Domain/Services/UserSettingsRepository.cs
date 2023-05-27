@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using MudBlazor;
 using TravelingSalesmanWebApp.Data.Models;
 
-namespace TravelingSalesmanWebApp.Data.Services;
+namespace TravelingSalesmanWebApp.Domain.Services;
 
 public interface IUserSettingsRepository
 {

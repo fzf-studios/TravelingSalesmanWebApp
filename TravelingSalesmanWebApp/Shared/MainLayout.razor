@@ -1,6 +1,8 @@
-@using TravelingSalesmanWebApp.Data.Services
+@using TravelingSalesmanWebApp.Domain.Services
 @inherits LayoutComponentBase
 @inject IUserSettingsRepository UserSettingsRepository
+@inject ApplicationDBContext Context
+
 <MudDialogProvider/>
 <MudSnackbarProvider/>
 <PageTitle>Задача коммивояжёра</PageTitle>
@@ -26,10 +28,12 @@
             </MudContainer>
         </MudMainContent>
     </MudContainer>
+   
 </MudLayout>
 
 @code
 {
+
     private bool IsDrawerOpened
     {
         get => UserSettingsRepository.DrawerOpened;

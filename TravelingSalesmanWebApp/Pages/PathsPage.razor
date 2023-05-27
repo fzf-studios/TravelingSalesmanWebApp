@@ -1,30 +1,33 @@
 @page "/Paths"
 @page "/Paths/{SelectedCityIdString}"
 @using TravelingSalesmanWebApp.Data.Models
+@using TravelingSalesmanWebApp.Domain.Services
 @using Path = Data.Models.Path
 @inject ApplicationDBContext Context
+@inject IUserSettingsRepository UserSettingsRepository
 
 <h3>Пути</h3>
-
-<MudSelect @bind-Value="@SelectedCity" T="City" Label="Начальный город">
-    @foreach (var item in Context.Cities)
-    {
-        <MudSelectItem Value="@item">@item.Name</MudSelectItem>
-    }
-</MudSelect>
-
-@if (SelectedCity != null)
-{
-    <MudSelect @bind-Value="@endCity" T="City" Label="Конечный город">
-        @foreach (var item in GetExceptSelected())
+<MudIconButton Disabled="UserSettingsRepository.CityIdHidden" Icon="@Icons.Material.Filled.DeleteForever" OnClick="ClearAll"/>
+<MudStack Row="true" Class="d-flex align-center" Justify="Justify.Center">
+    <MudSelect @bind-Value="@SelectedCity" T="City" Label="Начальный город">
+        @foreach (var item in Context.Cities)
         {
             <MudSelectItem Value="@item">@item.Name</MudSelectItem>
         }
     </MudSelect>
-    <MudTextField @bind-Value="weight" Label="Введите вес" Variant="Variant.Filled"></MudTextField>
-    <MudIconButton OnClick="CreatePath" Variant="Variant.Filled" Color="Color.Secondary" Icon="@Icons.Material.Filled.Add"></MudIconButton>
-}
 
+    @if (SelectedCity != null)
+    {
+        <MudSelect @bind-Value="@endCity" T="City" Label="Конечный город">
+            @foreach (var item in GetExceptSelected())
+            {
+                <MudSelectItem Value="@item">@item.Name</MudSelectItem>
+            }
+        </MudSelect>
+        <MudNumericField T="int" @bind-Value="weight" Label="Введите вес" Variant="Variant.Filled"></MudNumericField>
+        <MudIconButton OnClick="CreatePath" Variant="Variant.Filled" Color="Color.Secondary" Icon="@Icons.Material.Filled.Add"></MudIconButton>
+    }
+</MudStack>
 <MudStack Row="false">
     @foreach (var item in GetPathSelectedCity())
     {
@@ -43,7 +46,13 @@
 </MudStack>
 
 @code {
-    
+
+    public void ClearAll()
+    {
+        Context.Paths.RemoveRange(Context.Paths);
+        Context.SaveChangesAsync().AndForget();
+    }
+
     [Parameter]
     public string SelectedCityIdString { get; set; }
 
@@ -90,10 +99,11 @@
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        if (string.IsNullOrEmpty(SelectedCityIdString)) 
+        if (string.IsNullOrEmpty(SelectedCityIdString))
             return;
-        
+
         var selectedCityId = Guid.Parse(SelectedCityIdString);
         SelectedCity = Context.Cities.First(city => city.Id == selectedCityId);
     }
+
 }

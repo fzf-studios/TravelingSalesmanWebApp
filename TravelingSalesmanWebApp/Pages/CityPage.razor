@@ -1,12 +1,14 @@
 @page "/City"
 @using BlazorApp2.Domain.Helpers
 @using TravelingSalesmanWebApp.Data.Models
+@using TravelingSalesmanWebApp.Data.Services
 @using TravelingSalesmanWebApp.Domain.Services
 @inject ApplicationDBContext Context
 @inject IClipboardService ClipboardService
 @inject IUserSettingsRepository UserSettingsRepository
 @inject IValidationService ValidationService
 @inject NavigationManager NavigationManager
+@implements IDisposable
 
 <MudText Typo="Typo.h1" Align="Align.Center">Города</MudText>
 
@@ -104,20 +106,15 @@
     {
         base.OnInitialized();
         Cities = Context.Cities.ToList();
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            await UserSettingsRepository.LoadLastStateAsync();
-            StateHasChanged();
-        }
-        await base.OnAfterRenderAsync(firstRender);
+        UserSettingsRepository.OnStateChanged += StateHasChanged;
     }
 
     private string GetRefToPaths(City city) => $"/Paths/{city.Id}";
 
+    public void Dispose()
+    {
+        UserSettingsRepository.OnStateChanged -= StateHasChanged;
+    }
     private void ClearError()
     {
         cityNameTextField.Error = false;

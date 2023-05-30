@@ -5,5 +5,6 @@ namespace TravelingSalesmanWebApp.Domain.PathAlgorithm;
 
 public interface IPathAlgorithm
 {
-    List<Guid> FindShortestPath(Guid startCity, Guid endCity, List<Path> edges);
+    List<Guid> FindShortestPath(Guid startCity, Guid endCity);
+    void UpdatePaths(List<Path> paths);
 }

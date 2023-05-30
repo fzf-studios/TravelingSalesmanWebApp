@@ -1,15 +1,15 @@
-using TravelingSalesmanWebApp.Data.Models;
 using Path = TravelingSalesmanWebApp.Data.Models.Path;
 
 namespace TravelingSalesmanWebApp.Domain.PathAlgorithm;
 
 /// <summary>
-/// Реализация алгоритма Дейкстры 1
-/// Нужно либо оставить этот либо DijkstraAlgorithm
+/// Реализация алгоритма Дейкстры 2
+/// Немного отличается от первой, но по сути работает так же
 /// </summary>
-public class GreedyAlgorithm : IPathAlgorithm
+public class DijkstraAlgorithm : IPathAlgorithm
 {
     private List<Path> edges = new();
+
     public List<Guid> FindShortestPath(Guid startCity, Guid endCity)
     {
         var path = new List<Guid>();
@@ -17,9 +17,22 @@ public class GreedyAlgorithm : IPathAlgorithm
         var parents = new Dictionary<Guid, Guid>();
         var visited = new HashSet<Guid>();
         var queue = new PriorityQueue<Guid, int>();
+        foreach (var edge in edges)
+        {
+            foreach (var city in edge.CityIds)
+            {
+                if (city == startCity)
+                {
+                    distances[city] = 0;
+                }
+                else
+                {
+                    distances[city] = int.MaxValue;
+                }
+            }
+        }
+
         queue.Enqueue(startCity, 0);
-        distances[startCity] = 0;
-        parents[startCity] = Guid.Empty;
         while (queue.Count > 0)
         {
             var currentCity = queue.Dequeue();
@@ -27,18 +40,19 @@ public class GreedyAlgorithm : IPathAlgorithm
             {
                 break;
             }
+
             if (visited.Contains(currentCity))
             {
                 continue;
             }
+
             visited.Add(currentCity);
-            var currentCityDistance = distances[currentCity];
             var currentCityEdges = edges.Where(e => e.CityIds.Contains(currentCity));
             foreach (var edge in currentCityEdges)
             {
                 var otherCity = edge.CityIds.First(c => c != currentCity);
-                var otherCityDistance = currentCityDistance + edge.Weight;
-                if (!distances.ContainsKey(otherCity) || otherCityDistance < distances[otherCity])
+                var otherCityDistance = distances[currentCity] + edge.Weight;
+                if (otherCityDistance < distances[otherCity])
                 {
                     distances[otherCity] = otherCityDistance;
                     parents[otherCity] = currentCity;
@@ -46,12 +60,17 @@ public class GreedyAlgorithm : IPathAlgorithm
                 }
             }
         }
+
         var current = endCity;
         while (current != Guid.Empty)
         {
             path.Add(current);
+            if (!parents.ContainsKey(current))
+                break;
+
             current = parents[current];
         }
+
         path.Reverse();
         return path;
     }

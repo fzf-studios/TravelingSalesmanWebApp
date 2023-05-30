@@ -2,10 +2,20 @@
 @using Microsoft.AspNetCore.Components
 @using TravelingSalesmanWebApp.Data.Models
 @using TravelingSalesmanWebApp.Domain
+@using TravelingSalesmanWebApp.Domain.PathAlgorithm.Enum
+@using TravelingSalesmanWebApp.Domain.Services
 @inject ApplicationDBContext Context
 @inject IPathApplication PathApplication
+@inject IUserSettingsRepository UserSettingsRepository
 
 <h3>Поиск оптимального пути</h3>
+
+<MudSelect @bind-Value="@UserSettingsRepository.LastSelectedAlgorithm" T="AlgorithmType" Label="Алгоритм">
+    @foreach (var item in Enum.GetValues<AlgorithmType>())
+    {
+        <MudSelectItem Value="@item">@NameOf(item)</MudSelectItem>
+    }
+</MudSelect>
 
 <MudSelect @bind-Value="@startId" T="City" Label="Стартовый город">
     @foreach (var item in Context.Cities)
@@ -31,10 +41,32 @@
     public void GetResult()
     {
         var shortestPathModel = PathApplication.GetShortestPath(startId.Id, endId.Id);
+        if (shortestPathModel.IsEmpty)
+        {
+            result = "Не удалось найти путь";
+            return;
+        }
+        
         var distances = shortestPathModel.Paths.Select(x => x.Weight);
         var sumPath = distances
             .Sum();
         var resultNames = shortestPathModel.Cities.Select(city => city.Name);
         result = String.Join("->", resultNames) + " " + sumPath;
     }
+    
+    protected override void OnInitialized()
+    {
+        PathApplication.UpdateData();
+    }
+    
+    private string NameOf(AlgorithmType algorithmType)
+    {
+        return algorithmType switch {
+            AlgorithmType.Dijkstra => "Дейкстры",
+            AlgorithmType.Greedy => "Жадный",
+            AlgorithmType.DynamicProgramming => "Динамического программирования",
+            AlgorithmType.BranchAndBound => "Ветвей и границ"
+            };
+    }
+
 }

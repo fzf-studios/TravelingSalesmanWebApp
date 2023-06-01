@@ -14,17 +14,27 @@
 
 <MudStack Row="true" Class="d-flex align-center">
     <MudTextField @ref="@cityNameTextField" @bind-Value="@UserSettingsRepository.LastEnteredCityName" Label="Введите название города" OnKeyUp="ClearError" Variant="Variant.Filled"/>
-    <MudIconButton Icon="@Icons.Material.Filled.Add" OnClick="Add"></MudIconButton>
+    <MudTooltip Text="Добавить город" Arrow="true" Placement="Placement.Top">
+        <MudIconButton Icon="@Icons.Material.Filled.Add" OnClick="Add"></MudIconButton>
+    </MudTooltip>
 </MudStack>
 
 <MudStack Row="true" Class="d-flex align-center" Justify="Justify.Center">
-    <MudIconButton Icon="@Icons.Material.Filled.Password" OnClick="ChangeIdVisibility"/>
-    <MudToggleIconButton Icon="@Icons.Material.Filled.SyncDisabled" ToggledIcon="@Icons.Material.Filled.Sync" @bind-Toggled="@UserSettingsRepository.AutoSaveEnabled"/>
+    <MudTooltip Text="Отобразить ID" Arrow="true" Placement="Placement.Top">
+        <MudIconButton Icon="@Icons.Material.Filled.Password" OnClick="ChangeIdVisibility"/>
+    </MudTooltip>
+    <MudTooltip Text="Вкл/Выкл автосохранения" Arrow="true" Placement="Placement.Top">
+        <MudToggleIconButton Icon="@Icons.Material.Filled.SyncDisabled" ToggledIcon="@Icons.Material.Filled.Sync" @bind-Toggled="@UserSettingsRepository.AutoSaveEnabled"/>
+    </MudTooltip>
     @if (!UserSettingsRepository.AutoSaveEnabled)
     {
-        <MudIconButton Icon="@Icons.Material.Filled.Save" OnClick="ForceSave"/>
+        <MudTooltip Text="Сохранить изменения" Arrow="true" Placement="Placement.Top">
+            <MudIconButton Icon="@Icons.Material.Filled.Save" OnClick="ForceSave"/>
+        </MudTooltip>
     }
-    <MudIconButton Disabled="UserSettingsRepository.CityIdHidden" Icon="@Icons.Material.Filled.DeleteForever" OnClick="ClearAll"/>
+    <MudTooltip Text="Удалить все города" Arrow="true" Placement="Placement.Top">
+        <MudIconButton Disabled="UserSettingsRepository.CityIdHidden" Icon="@Icons.Material.Filled.DeleteForever" OnClick="ClearAll"/>
+    </MudTooltip>
 </MudStack>
 
 <MudStack>
@@ -39,8 +49,12 @@
                               OnAdornmentClick="() => CopyToClipboardAsync(item.Id.ToString()).AndForget()"/>
             }
             <MudTextField T="string" Variant="Variant.Filled" Label="Название" @bind-Value="@item.Name" OnBlur="SaveChangesIfAutoSave"/>
-            <MudIconButton Icon="@Icons.Material.Filled.EditRoad" Href="@GetRefToPaths(item)"/>
-            <MudIconButton Icon="@Icons.Material.Filled.RemoveCircle" OnClick="() => Remove(item)" Size="Size.Medium"/>
+            <MudTooltip Text="Показать все пути" Arrow="true" Placement="Placement.Top">
+                <MudIconButton Icon="@Icons.Material.Filled.EditRoad" Href="@GetRefToPaths(item)"/>
+            </MudTooltip>
+            <MudTooltip Text="Удалить город" Arrow="true" Placement="Placement.Top">
+                <MudIconButton Icon="@Icons.Material.Filled.RemoveCircle" OnClick="() => Remove(item)" Size="Size.Medium"/>
+            </MudTooltip>
         </MudStack>
     }
     <MudDivider/>
@@ -78,7 +92,7 @@
         if (UserSettingsRepository.AutoSaveEnabled)
             Context.SaveChangesAsync().AndForget();
     }
-    
+
     private void ChangeIdVisibility()
     {
         UserSettingsRepository.CityIdHidden = !UserSettingsRepository.CityIdHidden;
@@ -88,10 +102,10 @@
     public void ClearAll()
     {
         Context.Cities.RemoveRange(Context.Cities);
-        Cities.RemoveRange(0,Cities.Count);
+        Cities.RemoveRange(0, Cities.Count);
         SaveChangesIfAutoSave();
     }
-    
+
     private void ForceSave()
     {
         Context.SaveChangesAsync().AndForget();
@@ -115,6 +129,7 @@
     {
         UserSettingsRepository.OnStateChanged -= StateHasChanged;
     }
+
     private void ClearError()
     {
         cityNameTextField.Error = false;

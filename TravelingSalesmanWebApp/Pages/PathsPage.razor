@@ -7,45 +7,80 @@
 @inject IUserSettingsRepository UserSettingsRepository
 
 <h3>Пути</h3>
-<MudIconButton Disabled="UserSettingsRepository.CityIdHidden" Icon="@Icons.Material.Filled.DeleteForever" OnClick="ClearAll"/>
-<MudStack Row="true" Class="d-flex align-center" Justify="Justify.Center">
-    <MudSelect @bind-Value="@SelectedCity" T="City" Label="Начальный город">
-        @foreach (var item in Context.Cities)
-        {
-            <MudSelectItem Value="@item">@item.Name</MudSelectItem>
-        }
-    </MudSelect>
-
-    @if (SelectedCity != null)
-    {
-        <MudSelect @bind-Value="@endCity" T="City" Label="Конечный город">
-            @foreach (var item in GetExceptSelected())
+<MudTooltip Text="Вкл/Выкл все пути" Arrow="true" Placement="Placement.Top">
+    <MudToggleIconButton ToggledIcon="@Icons.Material.Rounded.TableView" Icon="@Icons.Material.Rounded.ViewList" @bind-Toggled="@TableViewMode"/>
+</MudTooltip>
+<MudTooltip Text="Удалить все пути" Arrow="true" Placement="Placement.Top">
+        <MudIconButton Disabled="TableViewMode" Icon="@Icons.Material.Filled.DeleteForever" OnClick="ClearAll"/>
+    </MudTooltip>
+@if (TableViewMode)
+{
+    <MudStack Row="true" Class="d-flex align-center" Justify="Justify.Center">
+        <MudSelect @bind-Value="@SelectedCity" T="City" Label="Начальный город">
+            @foreach (var item in Context.Cities)
             {
                 <MudSelectItem Value="@item">@item.Name</MudSelectItem>
             }
         </MudSelect>
-        <MudNumericField T="int" @bind-Value="weight" Label="Введите вес" Variant="Variant.Filled"></MudNumericField>
-        <MudIconButton OnClick="CreatePath" Variant="Variant.Filled" Color="Color.Secondary" Icon="@Icons.Material.Filled.Add"></MudIconButton>
-    }
-</MudStack>
-<MudStack Row="false">
-    @foreach (var item in GetPathSelectedCity())
-    {
-        <MudStack Row="true">
-            @if (selectedCity.Id == item.StartCityId)
-            {
-                <MudPaper Class="pa-3">@GetCityById(item.EndCityId).Name</MudPaper>
-            }
-            else
-            {
-                <MudPaper Class="pa-3">@GetCityById(item.StartCityId).Name</MudPaper>
-            }
-            <MudPaper Class="pa-3">@item.Weight</MudPaper>
-        </MudStack>
-    }
-</MudStack>
+
+        @if (SelectedCity != null)
+        {
+            <MudSelect @bind-Value="@endCity" T="City" Label="Конечный город">
+                @foreach (var item in GetExceptSelected())
+                {
+                    <MudSelectItem Value="@item">@item.Name</MudSelectItem>
+                }
+            </MudSelect>
+            <MudNumericField T="int" @bind-Value="weight" Label="Введите вес" Variant="Variant.Filled"></MudNumericField>
+            <MudTooltip Text="Добавить путь" Arrow="true" Placement="Placement.Top">
+                <MudIconButton Icon="@Icons.Material.Filled.AddRoad" OnClick="CreatePath"></MudIconButton>
+            </MudTooltip>
+        }
+    </MudStack>
+    <MudStack Row="false">
+        @foreach (var item in GetPathSelectedCity())
+        {
+            <MudStack Row="true">
+                @if (selectedCity.Id == item.StartCityId)
+                {
+                    <MudTextField T="string" Value="@GetCityById(item.EndCityId).Name"/>
+                }
+                else
+                {
+                    <MudTextField T="string" Value="@GetCityById(item.StartCityId).Name"/>
+                }
+                <MudTextField T="int" Value="@item.Weight"/>
+            </MudStack>
+        }
+    </MudStack>
+}
+else
+{
+    <MudTable Items="@Context.Paths" RowsPerPage="@rowsParPage" CurrentPage="@currentPage">
+        <HeaderContent>
+            <MudTh>Начальный город</MudTh>
+            <MudTh>Конечный город</MudTh>
+            <MudTh>Вес пути</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd>@GetCityById(context.StartCityId).Name</MudTd>
+            <MudTd>@GetCityById(context.EndCityId).Name</MudTd>
+            <MudTd>@context.Weight</MudTd>
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager>
+
+            </MudTablePager>
+        </PagerContent>
+    </MudTable>
+}
+
 
 @code {
+    int rowsParPage = 5;
+    int currentPage = 0;
+
+    public bool TableViewMode { get; set; }
 
     public void ClearAll()
     {

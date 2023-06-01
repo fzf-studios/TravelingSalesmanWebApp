@@ -1,4 +1,10 @@
 ﻿@page "/"
+@using Microsoft.AspNetCore.Components
+@using TravelingSalesmanWebApp.Data.Models
+@using TravelingSalesmanWebApp.Domain
+@inject ApplicationDBContext Context
+@inject IPathApplication PathApplication
 <PageTitle>Главная страница</PageTitle>
 
 <MudText Typo="Typo.h2" Align="Align.Center">Добро пожаловать!</MudText>
+ 

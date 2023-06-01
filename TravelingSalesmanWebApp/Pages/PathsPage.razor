@@ -40,16 +40,17 @@
     <MudStack Row="false">
         @foreach (var item in GetPathSelectedCity())
         {
-            <MudStack Row="true">
-                @if (selectedCity.Id == item.StartCityId)
-                {
-                    <MudTextField T="string" Value="@GetCityById(item.EndCityId).Name"/>
+            <MudStack Row="true" Class="d-flex align-center">
+                @{ 
+                    var itemCityId = selectedCity.Id == item.StartCityId 
+                       ? item.EndCityId 
+                       : item.StartCityId;
+                    var itemCityName = GetCityById(itemCityId).Name;
+                    void RemoveItemPath() => RemovePath(item);
                 }
-                else
-                {
-                    <MudTextField T="string" Value="@GetCityById(item.StartCityId).Name"/>
-                }
-                <MudTextField T="int" Value="@item.Weight"/>
+                <MudTextField T="string" ReadOnly="true" Variant="Variant.Outlined" Value="@itemCityName"/>
+                <MudTextField T="int" ReadOnly="true" Variant="Variant.Outlined" Value="@item.Weight"/>
+                <MudIconButton Icon="@Icons.Material.Filled.RemoveCircle" OnClick="@RemoveItemPath"></MudIconButton>
             </MudStack>
         }
     </MudStack>
@@ -129,6 +130,12 @@ else
         if (selectedCity == null) return Array.Empty<Path>();
         return Context.Paths
             .Where(path => path.StartCityId == selectedCity.Id || path.EndCityId == selectedCity.Id);
+    }
+    
+    private void RemovePath(Path path)
+    {
+        Context.Paths.Remove(path);
+        Context.SaveChangesAsync().AndForget();
     }
 
     protected override void OnInitialized()

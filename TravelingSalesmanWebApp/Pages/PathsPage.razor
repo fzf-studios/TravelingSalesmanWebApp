@@ -11,8 +11,8 @@
     <MudToggleIconButton ToggledIcon="@Icons.Material.Rounded.TableView" Icon="@Icons.Material.Rounded.ViewList" @bind-Toggled="@TableViewMode"/>
 </MudTooltip>
 <MudTooltip Text="Удалить все пути" Arrow="true" Placement="Placement.Top">
-        <MudIconButton Disabled="TableViewMode" Icon="@Icons.Material.Filled.DeleteForever" OnClick="ClearAll"/>
-    </MudTooltip>
+    <MudIconButton Disabled="TableViewMode" Icon="@Icons.Material.Filled.DeleteForever" OnClick="ClearAll"/>
+</MudTooltip>
 @if (TableViewMode)
 {
     <MudStack Row="true" Class="d-flex align-center" Justify="Justify.Center">
@@ -41,16 +41,18 @@
         @foreach (var item in GetPathSelectedCity())
         {
             <MudStack Row="true" Class="d-flex align-center">
-                @{ 
-                    var itemCityId = selectedCity.Id == item.StartCityId 
-                       ? item.EndCityId 
-                       : item.StartCityId;
+                @{
+                    var itemCityId = selectedCity.Id == item.StartCityId
+                        ? item.EndCityId
+                        : item.StartCityId;
                     var itemCityName = GetCityById(itemCityId).Name;
                     void RemoveItemPath() => RemovePath(item);
                 }
                 <MudTextField T="string" ReadOnly="true" Variant="Variant.Outlined" Value="@itemCityName"/>
                 <MudTextField T="int" ReadOnly="true" Variant="Variant.Outlined" Value="@item.Weight"/>
-                <MudIconButton Icon="@Icons.Material.Filled.RemoveCircle" OnClick="@RemoveItemPath"></MudIconButton>
+                <MudTooltip Text="Удалить путь" Arrow="true" Placement="Placement.Top">
+                    <MudIconButton Icon="@Icons.Material.Filled.RemoveCircle" OnClick="@RemoveItemPath"></MudIconButton>
+                </MudTooltip>
             </MudStack>
         }
     </MudStack>
@@ -131,7 +133,7 @@ else
         return Context.Paths
             .Where(path => path.StartCityId == selectedCity.Id || path.EndCityId == selectedCity.Id);
     }
-    
+
     private void RemovePath(Path path)
     {
         Context.Paths.Remove(path);

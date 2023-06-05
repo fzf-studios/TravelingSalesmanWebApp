@@ -1,7 +1,6 @@
 using TravelingSalesmanWebApp.Data;
 using TravelingSalesmanWebApp.Data.Models;
 using TravelingSalesmanWebApp.Domain.PathAlgorithm;
-using TravelingSalesmanWebApp.Domain.PathAlgorithm.Enum;
 using TravelingSalesmanWebApp.Domain.Services;
 using Path = TravelingSalesmanWebApp.Data.Models.Path;
 
@@ -13,30 +12,18 @@ public interface IPathApplication
     void UpdateData();
 }
 
-public class PathApplication : IPathApplication, IDisposable
+public class PathApplication : IPathApplication
 {
     private readonly ApplicationDBContext _context;
     private readonly IUserSettingsRepository _userSettingsRepository;
 
-    private IPathAlgorithm _selectedPathAlgorithm;
+    private IPathAlgorithm _pathAlgorithm;
+    
 
-    /// <summary>
-    /// Словарь алгоритмов, где ключ - тип алгоритма, а значение - сама реализация
-    /// </summary>
-    private readonly Dictionary<AlgorithmType, IPathAlgorithm> _pathAlgorithms = new()
-    {
-        { AlgorithmType.Greedy, new RealGreedyAlgorithm() },
-        { AlgorithmType.Dijkstra, new GreedyAlgorithm() }, //TODO: fix, GreedyAlgorithm and DejkstraAlgorithm are same
-        { AlgorithmType.DynamicProgramming, new DynamicProgrammingAlgorithm() },
-        { AlgorithmType.BranchAndBound, new BranchAndBoundAlgorithm() }
-    };
-
-    public PathApplication(ApplicationDBContext context, IUserSettingsRepository userSettingsRepository)
+    public PathApplication(ApplicationDBContext context, IPathAlgorithm pathAlgorithm)
     {
         _context = context;
-        _userSettingsRepository = userSettingsRepository;
-        _userSettingsRepository.OnStateChanged += OnUserSettingsChanged;
-        _selectedPathAlgorithm = _pathAlgorithms[_userSettingsRepository.LastSelectedAlgorithm];
+        _pathAlgorithm = pathAlgorithm;
     }
 
     /// <summary>
@@ -46,12 +33,12 @@ public class PathApplication : IPathApplication, IDisposable
     public void UpdateData()
     {
         var allPaths = _context.Paths.ToList();
-        _selectedPathAlgorithm.UpdatePaths(allPaths);
+        _pathAlgorithm.UpdatePaths(allPaths);
     }
 
     public ShortestPathModel GetShortestPath(Guid startId, Guid endId)
     {
-        var shortestPath = _selectedPathAlgorithm.FindShortestPath(startId, endId);
+        var shortestPath = _pathAlgorithm.FindShortestPath(startId, endId);
         if (shortestPath.Count == 0)
             return ShortestPathModel.Empty;
         
@@ -80,14 +67,4 @@ public class PathApplication : IPathApplication, IDisposable
         return paths.First(path => path.CityIds.Contains(startId) && path.CityIds.Contains(endId));
     }
     
-    private void OnUserSettingsChanged()
-    {
-        _selectedPathAlgorithm = _pathAlgorithms[_userSettingsRepository.LastSelectedAlgorithm];
-        UpdateData();
-    }
-    
-    public void Dispose()
-    {
-        _userSettingsRepository.OnStateChanged -= OnUserSettingsChanged;
-    }
 }

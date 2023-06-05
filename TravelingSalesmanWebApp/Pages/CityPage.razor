@@ -1,25 +1,138 @@
 @page "/City"
-@using BlazorApp2.Data
+@using BlazorApp2.Domain.Helpers
+@using TravelingSalesmanWebApp.Data.Models
+@using TravelingSalesmanWebApp.Data.Services
+@using TravelingSalesmanWebApp.Domain.Services
 @inject ApplicationDBContext Context
-<h3>Города</h3>
+@inject IClipboardService ClipboardService
+@inject IUserSettingsRepository UserSettingsRepository
+@inject IValidationService ValidationService
+@inject NavigationManager NavigationManager
+@implements IDisposable
 
-<MudTextField @bind-Value="CityName" Label="Введите название города" Variant="Variant.Filled"></MudTextField>
-<MudButton OnClick="AddCityDb">Добавить</MudButton>
-@foreach (var item in Context.Cities)
-{
-    <MudText>@item.Name</MudText>
-}
+<MudText Typo="Typo.h1" Align="Align.Center">Города</MudText>
+
+<MudStack Row="true" Class="d-flex align-center">
+    <MudTextField @ref="@cityNameTextField" @bind-Value="@UserSettingsRepository.LastEnteredCityName" Label="Введите название города" OnKeyUp="ClearError" Variant="Variant.Filled"/>
+    <MudTooltip Text="Добавить город" Arrow="true" Placement="Placement.Top">
+        <MudIconButton Icon="@Icons.Material.Filled.Add" OnClick="Add"></MudIconButton>
+    </MudTooltip>
+</MudStack>
+
+<MudStack Row="true" Class="d-flex align-center" Justify="Justify.Center">
+    <MudTooltip Text="Отобразить ID" Arrow="true" Placement="Placement.Top">
+        <MudIconButton Icon="@Icons.Material.Filled.Password" OnClick="ChangeIdVisibility"/>
+    </MudTooltip>
+    <MudTooltip Text="Вкл/Выкл автосохранения" Arrow="true" Placement="Placement.Top">
+        <MudToggleIconButton Icon="@Icons.Material.Filled.SyncDisabled" ToggledIcon="@Icons.Material.Filled.Sync" @bind-Toggled="@UserSettingsRepository.AutoSaveEnabled"/>
+    </MudTooltip>
+    @if (!UserSettingsRepository.AutoSaveEnabled)
+    {
+        <MudTooltip Text="Сохранить изменения" Arrow="true" Placement="Placement.Top">
+            <MudIconButton Icon="@Icons.Material.Filled.Save" OnClick="ForceSave"/>
+        </MudTooltip>
+    }
+    <MudTooltip Text="Удалить все города" Arrow="true" Placement="Placement.Top">
+        <MudIconButton Disabled="UserSettingsRepository.CityIdHidden" Icon="@Icons.Material.Filled.DeleteForever" OnClick="ClearAll"/>
+    </MudTooltip>
+</MudStack>
+
+<MudStack>
+    @foreach (var item in Cities)
+    {
+        <MudStack Row="true" Class="d-flex align-center">
+            @if (!UserSettingsRepository.CityIdHidden)
+            {
+                <MudTextField T="Guid" Variant="Variant.Outlined" Label="ID"
+                              ReadOnly="true" @bind-Value="@item.Id"
+                              Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.ContentCopy"
+                              OnAdornmentClick="() => CopyToClipboardAsync(item.Id.ToString()).AndForget()"/>
+            }
+            <MudTextField T="string" Variant="Variant.Filled" Label="Название" @bind-Value="@item.Name" OnBlur="SaveChangesIfAutoSave"/>
+            <MudTooltip Text="Показать все пути" Arrow="true" Placement="Placement.Top">
+                <MudIconButton Icon="@Icons.Material.Filled.EditRoad" Href="@GetRefToPaths(item)"/>
+            </MudTooltip>
+            <MudTooltip Text="Удалить город" Arrow="true" Placement="Placement.Top">
+                <MudIconButton Icon="@Icons.Material.Filled.RemoveCircle" OnClick="() => Remove(item)" Size="Size.Medium"/>
+            </MudTooltip>
+        </MudStack>
+    }
+    <MudDivider/>
+</MudStack>
 
 @code {
-    public string CityName;
+    private List<City> Cities;
+    private MudTextField<string> cityNameTextField;
 
-    public void AddCityDb()
+    public void Add()
     {
-       var city = new Data.Models.City() { Name = CityName };
+        var valid = ValidationService.IsValidCityName(UserSettingsRepository.LastEnteredCityName, out var errorReason);
+        if (!valid)
+        {
+            cityNameTextField.ErrorText = errorReason;
+            cityNameTextField.Error = true;
+            return;
+        }
+        var city = new City { Name = UserSettingsRepository.LastEnteredCityName };
+        Cities.Add(city);
         Context.Cities.Add(city);
+        SaveChangesIfAutoSave();
+        UserSettingsRepository.LastEnteredCityName = string.Empty;
+    }
+
+    public void Remove(City city)
+    {
+        Context.Cities.Remove(city);
+        Cities.Remove(city);
+        SaveChangesIfAutoSave();
+    }
+
+    public void SaveChangesIfAutoSave()
+    {
+        if (UserSettingsRepository.AutoSaveEnabled)
+            Context.SaveChangesAsync().AndForget();
+    }
+
+    private void ChangeIdVisibility()
+    {
+        UserSettingsRepository.CityIdHidden = !UserSettingsRepository.CityIdHidden;
+        StateHasChanged();
+    }
+
+    public void ClearAll()
+    {
+        Context.Cities.RemoveRange(Context.Cities);
+        Cities.RemoveRange(0, Cities.Count);
+        SaveChangesIfAutoSave();
+    }
+
+    private void ForceSave()
+    {
         Context.SaveChangesAsync().AndForget();
     }
 
-   
+    private async Task CopyToClipboardAsync(string value)
+    {
+        await ClipboardService.WriteTextAsync(value);
+    }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        Cities = Context.Cities.ToList();
+        UserSettingsRepository.OnStateChanged += StateHasChanged;
+    }
+
+    private string GetRefToPaths(City city) => $"/Paths/{city.Id}";
+
+    public void Dispose()
+    {
+        UserSettingsRepository.OnStateChanged -= StateHasChanged;
+    }
+
+    private void ClearError()
+    {
+        cityNameTextField.Error = false;
+    }
 
 }

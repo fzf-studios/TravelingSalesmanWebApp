@@ -4,7 +4,6 @@
         <TargetFramework>net7.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
-        <RootNamespace>BlazorApp2</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
@@ -19,6 +18,10 @@
 
     <ItemGroup>
       <Content Remove="Shared\SurveyPrompt.razor" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Domain\PathAlgorithm\Enum" />
     </ItemGroup>
 
 </Project>

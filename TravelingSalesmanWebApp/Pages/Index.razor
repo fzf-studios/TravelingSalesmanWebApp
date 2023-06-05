@@ -1,12 +1,39 @@
 ﻿@page "/"
-
+@using Microsoft.AspNetCore.Components
+@using TravelingSalesmanWebApp.Data.Models
+@using TravelingSalesmanWebApp.Domain
+@inject ApplicationDBContext Context
+@inject IPathApplication PathApplication
 <PageTitle>Главная страница</PageTitle>
 
-<h1>Добро пожаловать!</h1>
+<MudText Typo="Typo.h2" Align="Align.Center">Добро пожаловать!</MudText>
 
-
-
-@code {
-    
-
-}
+<MudTypography Variant="TypographyVariant.H2">
+    Добро пожаловать на наш сайт, который поможет вам решить задачу коммивояжера!
+</MudTypography>
+<MudTypography Variant="TypographyVariant.Body1">
+    Мы предоставляем удобный интерфейс, разделенный на три страницы, чтобы облегчить вашу работу:
+</MudTypography>
+<MudList>
+    <MudListItem>
+        <MudTypography Variant="TypographyVariant.Subtitle1">Страница "Города":</MudTypography>
+        <MudTypography Variant="TypographyVariant.Body1">
+            Здесь вы можете добавлять, изменять и удалять города. Также доступно просмотрение списка ранее добавленных городов.
+        </MudTypography>
+    </MudListItem>
+    <MudListItem>
+        <MudTypography Variant="TypographyVariant.Subtitle1">Страница "Связи":</MudTypography>
+        <MudTypography Variant="TypographyVariant.Body1">
+            На этой странице вы можете связывать города между собой, создавая маршруты. Вы также можете просмотреть уже существующие связи между городами.
+        </MudTypography>
+    </MudListItem>
+    <MudListItem>
+        <MudTypography Variant="TypographyVariant.Subtitle1">Страница "Оптимальный путь":</MudTypography>
+        <MudTypography Variant="TypographyVariant.Body1">
+            Здесь вы найдете оптимальный путь от города А до города Б, преодолевая минимальное расстояние. Вы можете выбрать алгоритм на свой вкус, чтобы найти наилучший маршрут.
+        </MudTypography>
+    </MudListItem>
+</MudList>
+<MudTypography Variant="TypographyVariant.Body1">
+    Мы стремимся предоставить вам интуитивно понятный интерфейс и решение задачи коммивояжера с наименьшими затратами. Начните использовать наш сайт прямо сейчас и оптимизируйте свои путешествия!
+</MudTypography>

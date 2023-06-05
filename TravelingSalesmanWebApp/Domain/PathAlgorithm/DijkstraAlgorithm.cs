@@ -1,65 +1,82 @@
-using BlazorApp2.Data.Models;
-using Path = BlazorApp2.Data.Models.Path;
+using Path = TravelingSalesmanWebApp.Data.Models.Path;
 
-namespace BlazorApp2.Domain.PathAlgorithm;
+namespace TravelingSalesmanWebApp.Domain.PathAlgorithm;
 
+/// <summary>
+/// Реализация алгоритма Дейкстры 2
+/// Немного отличается от первой, но по сути работает так же
+/// </summary>
 public class DijkstraAlgorithm : IPathAlgorithm
+{
+    private List<Path> edges = new();
+
+    public List<Guid> FindShortestPath(Guid startCity, Guid endCity)
     {
-        public Dictionary<Guid, int> FindShortestPath(City startCity, City endCity, List<Path> edges)
+        var path = new List<Guid>();
+        var distances = new Dictionary<Guid, int>();
+        var parents = new Dictionary<Guid, Guid>();
+        var visited = new HashSet<Guid>();
+        var queue = new PriorityQueue<Guid, int>();
+        foreach (var edge in edges)
         {
-            Dictionary<Guid, int> distances = new Dictionary<Guid, int>();
-            Dictionary<Guid, Guid> previousCities = new Dictionary<Guid, Guid>();
-            HashSet<Guid> visitedCities = new HashSet<Guid>();
-
-            distances = edges
-                .SelectMany(edge => new[] { edge.StartCityId, edge.EndCityId })
-                .Distinct()
-                .ToDictionary(id => id, _ => Int32.MaxValue);
-            distances[startCity.Id] = 0;
-
-            while (true)
+            foreach (var city in edge.CityIds)
             {
-                var currentCity = GetNextCity(distances, visitedCities);
-                if (currentCity == Guid.Empty || currentCity == endCity.Id)
+                if (city == startCity)
                 {
-                    break;
+                    distances[city] = 0;
                 }
-
-                visitedCities.Add(currentCity);
-
-                foreach (var edge in edges.Where(e => e.StartCityId == currentCity))
+                else
                 {
-                    var neighborCity = edge.EndCityId;
-                    var totalDistance = (long)distances[currentCity] + edge.Weight;
-
-                    if (totalDistance < distances[neighborCity])
-                    {
-                        distances[neighborCity] = (int)totalDistance;
-                        previousCities[neighborCity] = currentCity;
-                    }
+                    distances[city] = int.MaxValue;
                 }
             }
-
-            return distances;
         }
 
-        private Guid GetNextCity(Dictionary<Guid, int> distances, HashSet<Guid> visitedCities)
+        queue.Enqueue(startCity, 0);
+        while (queue.Count > 0)
         {
-            var minDistance = int.MaxValue;
-            Guid nextCity = Guid.Empty;
-
-            foreach (var kvp in distances)
+            var currentCity = queue.Dequeue();
+            if (currentCity == endCity)
             {
-                var city = kvp.Key;
-                var distance = kvp.Value;
-
-                if (distance < minDistance && !visitedCities.Contains(city))
-                {
-                    minDistance = distance;
-                    nextCity = city;
-                }
+                break;
             }
 
-            return nextCity;
+            if (visited.Contains(currentCity))
+            {
+                continue;
+            }
+
+            visited.Add(currentCity);
+            var currentCityEdges = edges.Where(e => e.CityIds.Contains(currentCity));
+            foreach (var edge in currentCityEdges)
+            {
+                var otherCity = edge.CityIds.First(c => c != currentCity);
+                var otherCityDistance = distances[currentCity] + edge.Weight;
+                if (otherCityDistance < distances[otherCity])
+                {
+                    distances[otherCity] = otherCityDistance;
+                    parents[otherCity] = currentCity;
+                    queue.Enqueue(otherCity, otherCityDistance);
+                }
+            }
         }
+
+        var current = endCity;
+        while (current != Guid.Empty)
+        {
+            path.Add(current);
+            if (!parents.ContainsKey(current))
+                break;
+
+            current = parents[current];
+        }
+
+        path.Reverse();
+        return path;
     }
+
+    public void UpdatePaths(List<Path> paths)
+    {
+        edges = paths;
+    }
+}

@@ -1,9 +1,10 @@
-using BlazorApp2.Data.Models;
-using Path = BlazorApp2.Data.Models.Path;
+using TravelingSalesmanWebApp.Data.Models;
+using Path = TravelingSalesmanWebApp.Data.Models.Path;
 
-namespace BlazorApp2.Domain.PathAlgorithm;
+namespace TravelingSalesmanWebApp.Domain.PathAlgorithm;
 
 public interface IPathAlgorithm
 {
-    Dictionary<Guid, int> FindShortestPath(City startCity, City endCity, List<Path> edges);
+    List<Guid> FindShortestPath(Guid startCity, Guid endCity);
+    void UpdatePaths(List<Path> paths);
 }

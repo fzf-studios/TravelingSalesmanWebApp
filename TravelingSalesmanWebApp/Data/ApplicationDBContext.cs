@@ -1,8 +1,8 @@
-using BlazorApp2.Data.Models;
 using Microsoft.EntityFrameworkCore;
-using Path = BlazorApp2.Data.Models.Path;
+using TravelingSalesmanWebApp.Data.Models;
+using Path = TravelingSalesmanWebApp.Data.Models.Path;
 
-namespace BlazorApp2.Data;
+namespace TravelingSalesmanWebApp.Data;
 
 public class ApplicationDBContext:DbContext
 {

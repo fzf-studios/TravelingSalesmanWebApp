@@ -1,41 +1,85 @@
 @page "/PathFindingPage"
 @using Microsoft.AspNetCore.Components
-@using BlazorApp2.Data.Models
-@using BlazorApp2.Data
-@using BlazorApp2.Domain
+@using TravelingSalesmanWebApp.Data.Models
+@using TravelingSalesmanWebApp.Domain
+@using TravelingSalesmanWebApp.Domain.Services
 @inject ApplicationDBContext Context
 @inject IPathApplication PathApplication
+@inject IUserSettingsRepository UserSettingsRepository
 
 <h3>Поиск оптимального пути</h3>
 
-<MudSelect @bind-Value="@startId" T="City" Label="Стартовый город">
-    @foreach (var item in Context.Cities)
-    {
-        <MudSelectItem Value="@item">@item.Name</MudSelectItem>
-    }
-</MudSelect>
-<MudSelect @bind-Value="@endId" T="City" Label="Конечный город">
-    @foreach (var item in Context.Cities)
-    {
-        <MudSelectItem Value="@item">@item.Name</MudSelectItem>
-    }
-</MudSelect>
+<MudStack Row="true" Class="d-flex align-center" Justify="Justify.Center">
 
-    <MudIconButton OnClick="GetResult" Variant="Variant.Filled" Color="Color.Secondary" Icon="@Icons.Material.Filled.Calculate"></MudIconButton>
-    <MudText>@result</MudText>
+    <MudSelect @bind-Value="@startId" T="City" Label="Стартовый город">
+        @foreach (var item in Context.Cities)
+        {
+            <MudSelectItem Value="@item">@item.Name</MudSelectItem>
+        }
+    </MudSelect>
+    <MudSelect @bind-Value="@endId" T="City" Label="Конечный город">
+        @foreach (var item in Context.Cities)
+        {
+            <MudSelectItem Value="@item">@item.Name</MudSelectItem>
+        }
+    </MudSelect>
+
+    <MudIconButton OnClick="GetResult" Variant="Variant.Filled" Color="Color.Default" Icon="@Icons.Custom.Brands.Calculator"></MudIconButton>
+</MudStack>
+
+<MudTimeline TimelineAlign="TimelineAlign.Start" TimelinePosition="TimelinePosition.Top" TimelineOrientation="TimelineOrientation.Horizontal">
+    @foreach (var item in resultCityNames)
+    {
+        var isFirstCity = item == resultCityNames.First();
+        var isLastCity = item == resultCityNames.Last();
+        var size = isFirstCity || isLastCity
+            ? Size.Large
+            : Size.Medium;
+        var align = isFirstCity
+            ? TimelineAlign.Start
+            : isLastCity
+                ? TimelineAlign.End
+                : TimelineAlign.Default;
+        <MudTimelineItem Size="@size" TimelineAlign="@align">
+                <MudText Align="Align.Justify">@item</MudText>
+        </MudTimelineItem>
+    }
+</MudTimeline>
+@{
+    var distance = resultSumPaths == 0
+        ? "" 
+        : "Сумма пути: " + resultSumPaths;
+}
+<MudDivider Style="visibility: hidden" size="40px"/>
+<MudText Align="Align.Center" Typo="Typo.h3">@distance</MudText>
 
 @code {
     public City startId;
     public City endId;
-    public string result;
+    public string[] resultCityNames = { };
+    public int resultSumPaths;
 
     public void GetResult()
     {
-        var resultDictionary = PathApplication.GetShortestPath(startId.Id, endId.Id);
-        var sumPath = resultDictionary.Select(pair => pair.Value)
-            .Where(value => value != int.MaxValue && value > 0)
+        var shortestPathModel = PathApplication.GetShortestPath(startId.Id, endId.Id);
+        if (shortestPathModel.IsEmpty)
+        {
+            resultCityNames = new[] { "Не удалось найти путь" };
+            return;
+        }
+
+        var distances = shortestPathModel.Paths.Select(x => x.Weight);
+        var sumPath = distances
             .Sum();
-        var resultNames = resultDictionary.Select(pair => pair.Key.Name);
-        result = String.Join("->", resultNames) + " " + sumPath;
+
+        var resultNames = shortestPathModel.Cities.Select(city => city.Name);
+        resultCityNames = resultNames.ToArray();
+        resultSumPaths = sumPath;
     }
+
+    protected override void OnInitialized()
+    {
+        PathApplication.UpdateData();
+    }
+
 }

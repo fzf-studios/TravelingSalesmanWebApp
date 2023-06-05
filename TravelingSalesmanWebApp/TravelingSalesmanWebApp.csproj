@@ -20,4 +20,8 @@
       <Content Remove="Shared\SurveyPrompt.razor" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Domain\PathAlgorithm\Enum" />
+    </ItemGroup>
+
 </Project>

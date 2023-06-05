@@ -4,6 +4,7 @@ using MudBlazor.Services;
 using TravelingSalesmanWebApp.Data;
 using TravelingSalesmanWebApp.Data.Services;
 using TravelingSalesmanWebApp.Domain;
+using TravelingSalesmanWebApp.Domain.PathAlgorithm;
 using TravelingSalesmanWebApp.Domain.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +20,7 @@ builder.Services.AddScoped<IPathApplication, PathApplication>();
 builder.Services.AddScoped<IUserSettingsRepository, UserSettingsRepository>();
 builder.Services.AddScoped<IClipboardService, ClipboardService>();
 builder.Services.AddScoped<IValidationService, ValidationService>();
+builder.Services.AddScoped<IPathAlgorithm, DijkstraAlgorithm>();
 builder.Services.AddSession();
 
 var app = builder.Build();

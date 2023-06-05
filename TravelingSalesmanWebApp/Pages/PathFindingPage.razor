@@ -2,7 +2,6 @@
 @using Microsoft.AspNetCore.Components
 @using TravelingSalesmanWebApp.Data.Models
 @using TravelingSalesmanWebApp.Domain
-@using TravelingSalesmanWebApp.Domain.PathAlgorithm.Enum
 @using TravelingSalesmanWebApp.Domain.Services
 @inject ApplicationDBContext Context
 @inject IPathApplication PathApplication
@@ -11,12 +10,6 @@
 <h3>Поиск оптимального пути</h3>
 
 <MudStack Row="true" Class="d-flex align-center" Justify="Justify.Center">
-    <MudSelect @bind-Value="@UserSettingsRepository.LastSelectedAlgorithm" T="AlgorithmType" Label="Алгоритм">
-        @foreach (var item in Enum.GetValues<AlgorithmType>())
-        {
-            <MudSelectItem Value="@item">@NameOf(item)</MudSelectItem>
-        }
-    </MudSelect>
 
     <MudSelect @bind-Value="@startId" T="City" Label="Стартовый город">
         @foreach (var item in Context.Cities)
@@ -87,16 +80,6 @@
     protected override void OnInitialized()
     {
         PathApplication.UpdateData();
-    }
-
-    private string NameOf(AlgorithmType algorithmType)
-    {
-        return algorithmType switch {
-            AlgorithmType.Dijkstra => "Дейкстры",
-            AlgorithmType.Greedy => "Жадный",
-            AlgorithmType.DynamicProgramming => "Динамического программирования",
-            AlgorithmType.BranchAndBound => "Ветвей и границ"
-            };
     }
 
 }
